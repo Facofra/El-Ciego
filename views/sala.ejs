@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="icon" href="data:,">
+    <title>El ciego</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" integrity="sha512-v8ng/uGxkge3d1IJuEo6dJP8JViyvms0cly9pnbfRxT6/31c3dRWxIiwGnMSWwZjHKOuY3EVmijs7k1jz/9bLA==" crossorigin="anonymous"></script>
+    <script src="/javascripts/sala.js"></script>
+  </head>
+  <body>
+    <h1>Bienvenido a EL CIEGO</h1>
+    <p>Juego de cartas epico</p>
+    <div>
+      <p>cantidad de jugadores: <span  class="contador"></span> </p>
+      <ul class="nombres">
+      </ul>
+    </div>
+
+    <input type="text" class="texto" placeholder="mensaje a enviar">
+    <button type="submit" class="boton"> Enviar</button>
+    <button type="submit" class="mezclar"> mezclar</button>
+    <button type="submit" class="repartir"> repartir</button>
+    <p class="mazo"></p>
+    <p class="mano"></p>
+    <ul class="chat"></ul>
+  </body>
+</html>
