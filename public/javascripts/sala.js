@@ -1,6 +1,6 @@
 
 window.addEventListener('load',function(){
-    let socket = io.connect('http://localhost:3000');
+    let socket = io.connect(location.origin);
     
     let texto = document.querySelector('.texto')
     let boton = document.querySelector('.boton')
