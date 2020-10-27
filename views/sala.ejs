@@ -8,20 +8,31 @@
     <script src="/javascripts/sala.js"></script>
   </head>
   <body>
-    <h1>Bienvenido a EL CIEGO</h1>
-    <p>Juego de cartas epico</p>
-    <div>
-      <p>cantidad de jugadores: <span  class="contador"></span> </p>
-      <ul class="nombres">
-      </ul>
-    </div>
+    <aside>
+      <div>
+        <p>cantidad de jugadores: <span  class="contador"></span> </p>
+        <ul class="nombres">
+        </ul>
+      </div>
+  
+      <input type="text" class="texto" placeholder="mensaje a enviar">
+      <button type="submit" class="boton"> Enviar</button>
+      <button type="submit" class="iniciar"> iniciar</button>
+      <ul class="chat"></ul>
 
-    <input type="text" class="texto" placeholder="mensaje a enviar">
-    <button type="submit" class="boton"> Enviar</button>
-    <button type="submit" class="mezclar"> mezclar</button>
-    <button type="submit" class="repartir"> repartir</button>
-    <p class="mazo"></p>
-    <p class="mano"></p>
-    <ul class="chat"></ul>
+    </aside>
+
+    <main>
+      <div class="mazo"></div>
+      <img src="../public/images/cartas/Ace-of-Clubs.png" alt="">
+      <img src="../public/images/cartas/Ace-of-Diamonds.png" alt="">
+      <div class="pila"></div>
+      <div class="jugador1 jugador13 players"></div>
+      <div class="jugador2 jugador24 players"></div>
+      <div class="jugador3 jugador13 players"></div>
+      <div class="jugador4 jugador24 players"></div>
+
+    </main>
+
   </body>
 </html>

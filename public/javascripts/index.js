@@ -1,14 +1,37 @@
 
 window.addEventListener('load',function(){
+    let socket = io.connect(location.origin)
     
     let texto = document.querySelector('.texto')
     let boton = document.querySelector('.boton')
-    let lista = document.querySelector('.lista')
+    let chat = document.querySelector('.chat')
     let nickname = prompt("Nickname: ")
-    let cartas = document.querySelectorAll('.carta')
+    let contador = document.querySelector('.contador');
+    let nombres = document.querySelector('.nombres');
+    let idNum;
+    // let cartas = document.querySelectorAll('.carta')
+    sessionStorage.setItem("ciegoNickname",nickname);
+    socket.on("connect",()=>{
+        idNum = (socket.id);
+    })
     
+    
+    socket.emit('listarme',nickname);
+    
+    socket.on('lista',jugadores=>{
+        nombres.innerHTML="";
+        for (const jugador of jugadores) {
+            if (jugador.nombre == nickname) {
+                nombres.innerHTML += `<li style="color: blue;"> ${jugador.nombre} (vos) </li>`
+            }else{
+                nombres.innerHTML += `<li > ${jugador.nombre}  </li>`
 
-    let socket = io.connect('http://localhost:3000')
+            }
+        }
+    })
+    socket.on('conexion',data=>{
+        contador.innerHTML = data;
+    })
 
     function enviar() {
         let data = {
@@ -20,6 +43,7 @@ window.addEventListener('load',function(){
 
     boton.addEventListener('click',(e)=>{
         enviar()
+        texto.value = ""
     })
 
     texto.addEventListener('keypress',e=>{
@@ -30,21 +54,21 @@ window.addEventListener('load',function(){
     })
 
     socket.on('conversacion',(data)=>{
-        lista.innerHTML += `<li>${data.emisor}: ${data.mensaje}</li>`
+        chat.innerHTML += `<li>${data.emisor}: ${data.mensaje}</li>`
     })
 
-    cartas.forEach((carta,index) => {
-        carta.addEventListener('click',function(e){
-            carta.querySelector('.imagenCarta').classList.toggle('oculto')
-            carta.querySelector('.dorso').classList.toggle('oculto')
-            socket.emit('borrar',index)
-        })
-    });
+    // cartas.forEach((carta,index) => {
+    //     carta.addEventListener('click',function(e){
+    //         carta.querySelector('.imagenCarta').classList.toggle('oculto')
+    //         carta.querySelector('.dorso').classList.toggle('oculto')
+    //         socket.emit('borrar',index)
+    //     })
+    // });
 
-    socket.on('borrar',(data)=>{
-        cartas[data].querySelector('.imagenCarta').classList.toggle('oculto')
-        cartas[data].querySelector('.dorso').classList.toggle('oculto')
+    // socket.on('borrar',(data)=>{
+    //     cartas[data].querySelector('.imagenCarta').classList.toggle('oculto')
+    //     cartas[data].querySelector('.dorso').classList.toggle('oculto')
        
-    })
+    // })
 
 });

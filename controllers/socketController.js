@@ -5,40 +5,36 @@ function shuffleArray(array) {
   }
 }
 
-class Jugador{
-  constructor(nombre,id){
-    this.nombre = nombre;
-    this.id = id;
-    this.mano=[];
-  }
-}
+let {Pila,Jugador,Partida,Mazo,Carta}= require("../classes/classes");
 
 module.exports={
     index: function(io){
+        let pila= new Pila();
+        let partida= new Partida();
+        let mazo= new Mazo();
+        mazo.crear();
 
-        let jugadores=[];
-        let mazo=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
 
         io.sockets.on('connection',(socket)=>{
             
             socket.on('listarme',nombre=>{
               io.sockets.emit('conexion',io.engine.clientsCount);
-              // let jugador = {
-              //   nombre,
-              //   id: socket.id
-              // }
+
               let jugador = new Jugador(nombre,socket.id);
-              jugadores.push(jugador);
-              console.log(jugadores);
-              io.sockets.emit('lista',jugadores);
+              partida.sumarJugador(jugador);
+
+              console.log(partida.jugadores);
+              io.sockets.emit('lista',partida.jugadores);
             })
             
             socket.on('disconnect',()=>{
               console.log("usuario desconectado: " + socket.id );
-              jugadores = jugadores.filter(e=> e.id != socket.id);
-              console.log(jugadores);
+              partida.restarJugador(socket.id);
 
-              io.sockets.emit('lista',jugadores);
+              
+              console.log(partida.jugadores);
+
+              io.sockets.emit('lista',partida.jugadores);
               io.sockets.emit('conexion',io.engine.clientsCount);
             })
           
@@ -47,19 +43,13 @@ module.exports={
               io.sockets.emit('conversacion',data)
             })
           
-            socket.on("mezclar",(data)=>{
-              shuffleArray(mazo);
+            socket.on("iniciar",(data)=>{
+              mazo.mezclar();
+              partida.iniciar(mazo);
 
-              io.sockets.emit("mezclar",mazo);
-            })
-          
-            socket.on("repartir",()=>{
-              for(jugador of jugadores){
-                for (let i = 0; i < 4; i++) {
-                  jugador.mano.push(mazo.pop())            
-                }
-              }
-              io.sockets.emit("repartir",jugadores);
+              io.sockets.emit("iniciar",mazo);
+              io.sockets.emit("repartija",partida);
+
             })
 
 
@@ -72,9 +62,9 @@ module.exports={
 
 
 
-            socket.on('borrar',(data)=>{
-              socket.broadcast.emit('borrar',data)
-            })
+            // socket.on('borrar',(data)=>{
+            //   socket.broadcast.emit('borrar',data)
+            // })
           
           
           })
