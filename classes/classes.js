@@ -2,7 +2,7 @@ class Carta{
     constructor(numero,palo){
         this.numero=numero;
         this.palo=palo;
-        this.imagen=null;
+        this.imagen=this.palo + this.numero + ".png";
         this.deCara=false;
     }
 }

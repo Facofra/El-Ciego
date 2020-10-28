@@ -46,6 +46,7 @@ module.exports={
             socket.on("iniciar",(data)=>{
               mazo.mezclar();
               partida.iniciar(mazo);
+              console.log(partida.jugadores[0]);
 
               io.sockets.emit("iniciar",mazo);
               io.sockets.emit("repartija",partida);

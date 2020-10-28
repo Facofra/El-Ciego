@@ -75,7 +75,7 @@ window.addEventListener('load',function(){
                 Jugadores.push(Jugadores.shift());
             }
 
-            players[0].innerHTML= jugadores[0].nombre + " (vos)"
+            players[0].innerHTML= Jugadores[0].nombre + " (vos)"
 
             for (let i = 1; i < Jugadores.length; i++) {
                 players[i].innerHTML = Jugadores[i].nombre;
