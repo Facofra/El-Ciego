@@ -53,7 +53,19 @@ module.exports={
 
             })
 
+            socket.on("tomar",(id)=>{
+              let jugador;
+              for (const jugadoraux of partida.jugadores) {
+                if (jugadoraux.id == id) {
+                  jugador=jugadoraux;
+                  break;
+                }
+              }
+              jugador.tomar(mazo);
 
+              io.sockets.emit("tomar",jugador);
+
+            })
 
 
 

@@ -37,6 +37,12 @@ main{
   bottom: 2%;
   right: 38%;
 }
+
+.playerName1{
+  left: -25%;
+  color: blue;
+}
+
 .jugador2{
   -webkit-transform: rotate(270deg); /* Safari and Chrome */
   -moz-transform: rotate(270deg);   /* Firefox */
@@ -48,6 +54,17 @@ main{
   right: 2%;
   bottom: 38%;
 }
+
+.playerName2{
+  -webkit-transform: rotate(-270deg); /* Safari and Chrome */
+  -moz-transform: rotate(-270deg);   /* Firefox */
+  -ms-transform: rotate(-270deg);   /* IE 9 */
+  -o-transform: rotate(-270deg);   /* Opera */
+  transform: rotate(-270deg);
+  left: -15%;
+  bottom: 10%;
+}
+
 .jugador3{
   -webkit-transform: rotate(180deg); /* Safari and Chrome */
   -moz-transform: rotate(180deg);   /* Firefox */
@@ -59,6 +76,17 @@ main{
   top: 2%;
   right: 38%;
 }
+
+.playerName3{
+  -webkit-transform: rotate(-180deg); /* Safari and Chrome */
+  -moz-transform: rotate(-180deg);   /* Firefox */
+  -ms-transform: rotate(-180deg);   /* IE 9 */
+  -o-transform: rotate(-180deg);   /* Opera */
+  transform: rotate(-180deg);
+  right: -15%;
+  bottom: 5%;
+}
+
 .jugador4{
   -webkit-transform: rotate(90deg); /* Safari and Chrome */
   -moz-transform: rotate(90deg);   /* Firefox */
@@ -71,38 +99,67 @@ main{
   bottom: 38%;
 }
 
+.playerName4{
+  -webkit-transform: rotate(-90deg); /* Safari and Chrome */
+  -moz-transform: rotate(-90deg);   /* Firefox */
+  -ms-transform: rotate(-90deg);   /* IE 9 */
+  -o-transform: rotate(-90deg);   /* Opera */
+  transform: rotate(-90deg);
+  right: -10%;
+  bottom: 2%;
+}
+
+.playerName{
+  position: absolute;
+}
+
 .carta{
   width: 20%;
-  height: 35%;
+  height: 45%;
   border: black double 1px;
 }
 
  .carta1{
   background-color: red;
   position: absolute;
-  top: 5%;
-  left: 5%;
+  top: 2%;
+  left: 10%;
 }
 
  .carta2{
   background-color: red;
   position: absolute;
-  top: 5%;
-  right:5%;
+  top: 2%;
+  right:10%;
 }
 
  .carta3{
   background-color: red;
   position: absolute;
-  bottom: 5%;
-  left: 5%;
+  bottom: 2%;
+  left: 10%;
 }
 
  .carta4{
   background-color: red;
   position: absolute;
-  bottom: 5%;
-  right: 5%;
+  bottom: 2%;
+  right: 10%;
+}
+
+ .carta5{
+  background-color: red;
+  position: absolute;
+  bottom: 20%;
+  right: -35%;
+  width: 30%;
+  height: 60%;
+  border: black double 1px;
+}
+
+img{
+  max-width:100%;
+  max-height:100%;
 }
 
 .mazo{

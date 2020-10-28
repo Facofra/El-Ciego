@@ -25,11 +25,13 @@ window.addEventListener('load',function(){
     let Jugadores;
     let Partida;
 
+    let carta5 = document.querySelector('.carta5');
     let jugador1=document.querySelector('.jugador1');
     let jugador2=document.querySelector('.jugador2');
     let jugador3=document.querySelector('.jugador3');
     let jugador4=document.querySelector('.jugador4');
     let players = document.querySelectorAll('.players');
+    let playerNames = document.querySelectorAll('.playerName')
     
     if (nickname == null) {
         nickname = prompt("Nickname: ")
@@ -75,15 +77,40 @@ window.addEventListener('load',function(){
                 Jugadores.push(Jugadores.shift());
             }
 
-            players[0].innerHTML= Jugadores[0].nombre + " (vos)"
+            playerNames[0].innerHTML= Jugadores[0].nombre + " (vos)"
 
             for (let i = 1; i < Jugadores.length; i++) {
-                players[i].innerHTML = Jugadores[i].nombre;
+                playerNames[i].innerHTML = Jugadores[i].nombre;
+            }
+
+            for (let i = 0; i < Jugadores.length; i++) {
+                let cartas =players[i].querySelectorAll('.carta');
+                cartas.forEach((carta,idx)=>{
+                    carta.innerHTML= `<img src="/images/cartas/${Jugadores[i].mano[idx].imagen}" alt="">`
+                })
             }
 
         })
-        
         // ------------------------fin iniciar juego -------------------------
+
+        // ##################### tomar mazo ######################
+        deck.addEventListener('click',()=>{
+            socket.emit("tomar",idNum);
+        })
+
+        socket.on('tomar',(jugador)=>{
+            for (let i = 0; i < Jugadores; i++) {
+                if(Jugadores[i].id == jugador.id){
+                    Jugadores[i] = jugador;
+                }
+            }
+
+            if (jugador.id == idNum) {
+                carta5.innerHTML = `<img src="/images/cartas/${jugador.cartaTemporal.imagen}" alt="">` ;
+            }
+
+        })
+        // ##################### fin tomar mazo ######################
 
         // ##################### chatear ######################
         boton.addEventListener('click',(e)=>{
