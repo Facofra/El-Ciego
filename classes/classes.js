@@ -89,20 +89,19 @@ class Partida{
     }
 
     iniciar(mazo){
-        this.turno = this.jugadores[0].id;
-        this.jugadores[0].turno=true;
+        this.turno = 0;
+        this.jugadores[this.turno].turno=true;
         this.repartir(mazo);
     }
 
     proximoTurno(){
-        this.jugadores[this.turno]=false;
+        this.jugadores[this.turno].turno=false;
         if (this.turno < this.jugadores.length-1) {
             this.turno++;
         }else{
             this.turno=0;
         }
-        this.jugadores[this.turno]=true;
-        
+        this.jugadores[this.turno].turno=true;
     }
 
     repartir(mazo){
@@ -117,10 +116,17 @@ class Partida{
 class Pila{
     constructor(){
         this.cartas=[];
+        this.ultima=null;
+    }
+
+
+    esVacia(){
+        return this.cartas.length == 0;
     }
 
     agregar(carta){
         this.cartas.push(carta);
+        this.ultima=carta;
     }
 
     vaciar(){
@@ -130,8 +136,14 @@ class Pila{
     }
 
     popear(){
+        if (this.cartas.length>1) {
+            this.ultima = this.cartas[this.cartas.length-2]
+        }else{
+            this.ultima=null;
+        }
         return this.cartas.pop();
     }
+
 }
 
 
