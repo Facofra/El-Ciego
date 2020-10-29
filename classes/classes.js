@@ -69,7 +69,8 @@ class Jugador{
 
     reemplazar(posicion){
         let aux=this.cartaTemporal;
-        this.cartaTemporal=(this.mano.splice(posicion-1,1,aux))[0];
+        this.cartaTemporal=(this.mano[posicion]);
+        this.mano[posicion]=aux;
     }
 
 }

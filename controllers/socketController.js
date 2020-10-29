@@ -53,7 +53,7 @@ module.exports={
               let jugador = findById(id,partida.jugadores);
               jugador.tomar(mazo);
 
-              io.sockets.emit("tomar",jugador);
+              io.sockets.emit("tomar",{jugador,mazo});
 
             })
 
@@ -78,17 +78,13 @@ module.exports={
               io.sockets.emit("proxTurno",partida.jugadores);
             })
 
+            socket.on("reemplazo",(indice)=>{
+              let jugador = findById(socket.id,partida.jugadores);
+              jugador.reemplazar(indice);
+              io.sockets.emit("reemplazo",jugador);
+            })
 
 
-
-
-
-
-
-
-            // socket.on('borrar',(data)=>{
-            //   socket.broadcast.emit('borrar',data)
-            // })
           
           
           })

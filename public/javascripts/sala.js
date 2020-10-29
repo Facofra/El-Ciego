@@ -1,17 +1,7 @@
 window.addEventListener('load',function(){
     let socket = io.connect(location.origin);
-
-    function enviar(emisor,mensaje) {
-        let data = {
-            emisor,
-            mensaje
-        }
-        socket.emit('conversacion',data)
-    }
-    
-    let texto = document.querySelector('.texto')
-    let boton = document.querySelector('.boton')
-    let chat = document.querySelector('.chat')
+ 
+    let cartasEnMazo= document.querySelector('.tamanioMazo')
     let contador = document.querySelector('.contador');
     let nombres = document.querySelector('.nombres');
     let turnoNombre = document.querySelector('.turnoNombre');
@@ -19,6 +9,7 @@ window.addEventListener('load',function(){
     let deck = document.querySelector('.mazo');
     let pila = document.querySelector('.pila');
     let nickname = sessionStorage.getItem("ciegoNickname");
+
     let idNum;
     let enjuego = false;
 
@@ -30,11 +21,15 @@ window.addEventListener('load',function(){
 
 
 
-    let carta5 = document.querySelector('.carta5');
     let jugador1=document.querySelector('.jugador1');
+    let carta5 = document.querySelector('.carta5');
+    let misCartas=jugador1.querySelectorAll('.carta');
+
     let jugador2=document.querySelector('.jugador2');
     let jugador3=document.querySelector('.jugador3');
     let jugador4=document.querySelector('.jugador4');
+
+
     let players = document.querySelectorAll('.players');
     let playerNames = document.querySelectorAll('.playerName')
     
@@ -43,7 +38,7 @@ window.addEventListener('load',function(){
     }
 
     socket.on("connect",()=>{
-// ####################### conectarse ##################
+// ####################### conectarse ########################################################################
         idNum = (socket.id);
         socket.on("initPila",(data)=>{
             Pila = data;
@@ -64,17 +59,19 @@ window.addEventListener('load',function(){
         socket.on('conexion',data=>{
             contador.innerHTML = data;
         })
-// ####################### fin conectarse ##################
+// ###############################################################################################
         
         
-// ------------------------ iniciar juego-------------------------
+// ------------------------ iniciar juego----------------------------------------------------------------------------------------
         iniciar.addEventListener("click",()=>{
             socket.emit("iniciar");
             
         })
         socket.on("iniciar",(mazo)=>{
+            enjuego=true;
+            iniciar.classList.toggle("oculto");
             Mazo = mazo;
-            deck.innerHTML = mazo.cartas.length;
+            cartasEnMazo.innerHTML = mazo.cartas.length;
         })
         
         socket.on("repartija",partida=>{
@@ -105,16 +102,16 @@ window.addEventListener('load',function(){
             }
 
         })
-// ------------------------fin iniciar juego -------------------------
+// ----------------------------------------------------------------------------------------------------------------
         
-// ##################### tomar mazo ######################
+// ##################### tomar mazo ############################################################################
         deck.addEventListener('click',()=>{
-            if (Jugadores[0].turno) {
+            if (Jugadores[0].turno && Jugadores[0].cartaTemporal==null && Mazo.cartas.length>0) {
                 socket.emit("tomar",idNum);
             }
         })
 
-        socket.on('tomar',(jugador)=>{
+        socket.on('tomar',({jugador,mazo})=>{
             for (let i = 0; i < Jugadores.length; i++) {
                 if(Jugadores[i].id == jugador.id){
                     Jugadores[i] = jugador;
@@ -124,11 +121,13 @@ window.addEventListener('load',function(){
             if (jugador.id == idNum) {
                 carta5.innerHTML = `<img src="/images/cartas/${jugador.cartaTemporal.imagen}" alt="">` ;
             }
+            Mazo = mazo;
+            cartasEnMazo.innerHTML = Mazo.cartas.length;
             
         })
-// ##################### fin tomar mazo ######################
+// ############################################################################################################
 
-// ------------------------depositar en pila -------------------------
+// ------------------------depositar en pila -------------------------------------------------------------------
 
         pila.addEventListener("click",()=>{
             if (Jugadores[0].cartaTemporal!=null) {
@@ -159,13 +158,9 @@ window.addEventListener('load',function(){
 
         socket.on("proxTurno",data=>{
             Jugadores=data;
-            console.log("antes");
-            console.log(Jugadores[0]);
             while (Jugadores[0].id != idNum ) {
                 Jugadores.push(Jugadores.shift());
             }
-            console.log("despues");
-            console.log(Jugadores[0]);
             for (const jugador of Jugadores) {
                 if (jugador.turno) {
                     turnoNombre.innerHTML = jugador.nombre;
@@ -173,25 +168,44 @@ window.addEventListener('load',function(){
             }
         })
 
-// ------------------------fin depositar en pila -------------------------
-        
-// ##################### chatear ######################
-        boton.addEventListener('click',(e)=>{
-            enviar(nickname,texto.value)
-            texto.value = ""
+// -----------------------------------------------------------------------------------------------------------------------
+
+// ##################################### reemplazar mano por carta en mesa ####################################################
+        misCartas.forEach((carta,idx)=>{
+            carta.addEventListener("click",function(){
+                if (Jugadores[0].turno && Jugadores[0].cartaTemporal!=null) {
+                    socket.emit("reemplazo",idx)
+                }
+            })
         })
 
-        texto.addEventListener('keypress',e=>{
-            if (e.keyCode == 13) {
-                enviar(nickname,texto.value)
-                texto.value = ""
+        socket.on("reemplazo",(jugador)=>{
+            console.log(jugador);
+            Jugadores.forEach((j,i)=>{
+                if (j.id == jugador.id) {
+                    Jugadores[i]=jugador;
+                }
+            })
+
+            for (let i = 0; i < Jugadores.length; i++) {
+                if (Jugadores[i].id == jugador.id) {
+                    let cartas =players[i].querySelectorAll('.carta');
+                    cartas.forEach((carta,idx)=>{
+                        carta.innerHTML= `<img src="/images/cartas/${Jugadores[i].mano[idx].imagen}" alt="">`;
+                    })
+                }
+            }
+            if(jugador.id == idNum){
+                carta5.innerHTML = `<img src="/images/cartas/${Jugadores[0].cartaTemporal.imagen}" alt="">` ;
             }
         })
+// ############################################################################################################
 
-        socket.on('conversacion',(data)=>{
-            chat.innerHTML += `<li>${data.emisor}: ${data.mensaje}</li>`
-        })
-// #################### fin chatear ######################
+
+
+
+
+
     })
 
 });
