@@ -67,7 +67,6 @@ window.addEventListener('load',function(){
             
         })
         socket.on("iniciar",({mazo,stack})=>{
-            enjuego=true;
             Pila=stack;
             iniciar.classList.toggle("oculto");
             Mazo = mazo;
@@ -80,7 +79,7 @@ window.addEventListener('load',function(){
         socket.on("repartija",partida=>{
             Partida = partida;
             Jugadores = Partida.jugadores;
-            enjuego=true;
+            
 
             while (Jugadores[0].id != idNum ) {
                 Jugadores.push(Jugadores.shift());
@@ -101,9 +100,19 @@ window.addEventListener('load',function(){
 
                 let cartas =players[i].querySelectorAll('.carta');
                 cartas.forEach((carta,idx)=>{
-                    // carta.innerHTML= `<img src="/images/cartas/${Jugadores[i].mano[idx].imagen}" alt="">`
-                    carta.innerHTML= `<img src="/images/cartas/dorso.png" alt="">`
+                    if ((idx == 2 || idx == 3) && Jugadores[i].id == idNum ) {
+                        carta.innerHTML= `<img src="/images/cartas/${Jugadores[i].mano[idx].imagen}" alt="">`
+                    }else{
+                        carta.innerHTML= `<img src="/images/cartas/dorso.png" alt="">`
+                    }
                 })
+
+                setTimeout(()=>{
+                    cartas.forEach((carta,idx)=>{
+                        carta.innerHTML= `<img src="/images/cartas/dorso.png" alt="">`;
+                        enjuego=true;                  
+                    })  
+                },5000)
             }
 
         })
