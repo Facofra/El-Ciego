@@ -73,6 +73,21 @@ class Jugador{
         this.mano[posicion]=aux;
     }
 
+    valorCartas(){
+        let total=0;
+        for (const carta of this.mano) {
+            if (carta!=null) {
+                if (carta.numero == 13 && (carta.palo == "corazon"|| carta.palo== "diamante")) {
+                    total--;
+                }else{
+                    total+= carta.numero;
+                }
+            }
+        }
+
+        return total;
+    }
+
 }
 
 class Partida{
@@ -111,6 +126,39 @@ class Partida{
                 jugador.mano.push(mazo.popear())
             }
         }
+    }
+
+    cortar(jugador){
+        let esMenor='<';
+        for (const player of this.jugadores) {
+            if (player == jugador) {
+                continue;
+            }
+            player.puntaje+= player.valorCartas();
+
+            if (jugador.valorCartas() > player.valorCartas()) {
+                esMenor = '>';
+            }else if(jugador.valorCartas() == player.valorCartas() && esMenor != '>'){
+                esMenor = '='
+            }
+        }
+
+        switch (esMenor) {
+            case '>':
+                jugador.puntaje+=25;
+                jugador.puntaje+= jugador.valorCartas();
+                break;
+            case '<':
+                jugador.puntaje+=-10;
+            break;
+            case '=':
+                jugador.puntaje+=10;
+                jugador.puntaje+= jugador.valorCartas();
+                break;
+            default:
+                break;
+        }
+
     }
 }
 

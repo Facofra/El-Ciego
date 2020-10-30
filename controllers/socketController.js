@@ -81,7 +81,29 @@ module.exports={
             socket.on("reemplazo",(indice)=>{
               let jugador = findById(socket.id,partida.jugadores);
               jugador.reemplazar(indice);
-              io.sockets.emit("reemplazo",jugador);
+              io.sockets.emit("reemplazo",{jugador,indice});
+            })
+
+            socket.on("espejito",(idx)=>{
+              let jugador = findById(socket.id,partida.jugadores);
+              jugador.reemplazar(idx);
+              pila.agregar(jugador.descartar());
+
+              io.sockets.emit("espejito",{data:pila,jugador});
+            })
+
+            socket.on("equivocacion",()=>{
+              let jugador = findById(socket.id,partida.jugadores);
+              jugador.puntaje+=10;
+
+              io.sockets.emit("equivocacion",jugador);
+            })
+
+            socket.on("cortar",()=>{
+              let jugador = findById(socket.id,partida.jugadores);
+              partida.cortar(jugador);
+
+              io.sockets.emit("cortar",partida.jugadores)
             })
 
 
