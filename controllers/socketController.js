@@ -13,11 +13,11 @@ module.exports={
         let pila= new Pila();
         let partida= new Partida();
         let mazo= new Mazo();
-        mazo.crear();
+        
 
 
         io.sockets.on('connection',(socket)=>{
-            io.sockets.emit("initPila",pila);
+            // io.sockets.emit("initPila",pila);
             
             socket.on('listarme',nombre=>{
               io.sockets.emit('conexion',io.engine.clientsCount);
@@ -37,14 +37,20 @@ module.exports={
             })
           
             socket.on('conversacion',(data)=>{
-              //socket.broadcast.emit('conversacion',data)
               io.sockets.emit('conversacion',data)
             })
           
-            socket.on("iniciar",(data)=>{
+            socket.on("iniciar",(hayPerdedor)=>{
+              pila.vaciar()
+              mazo.crear();
               mazo.mezclar();
               partida.iniciar(mazo);
-              io.sockets.emit("iniciar",mazo);
+              io.sockets.emit("iniciar",{mazo,stack:pila});
+              if (hayPerdedor) {
+                partida.jugadores.forEach(jugador=>{
+                  jugador.puntaje=0;
+                })
+              }
               io.sockets.emit("repartija",partida);
 
             })
@@ -103,7 +109,7 @@ module.exports={
               let jugador = findById(socket.id,partida.jugadores);
               partida.cortar(jugador);
 
-              io.sockets.emit("cortar",partida.jugadores)
+              io.sockets.emit("cortar",{jugadores:partida.jugadores,nombre:jugador.nombre})
             })
 
 

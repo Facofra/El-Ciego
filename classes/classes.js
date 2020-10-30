@@ -17,7 +17,7 @@ class Mazo{
     }
 
     crear(){
-        
+        this.cartas=[];
         for (const palo of ["pica","trebol","diamante","corazon"]) {
             for (let i = 0; i < 13; i++) {
                 this.agregar(new Carta(i%13+1,palo));
@@ -123,7 +123,7 @@ class Partida{
     repartir(mazo){
         for (const jugador of this.jugadores) {
             for (let i = 0; i < 4; i++) {
-                jugador.mano.push(mazo.popear())
+                jugador.mano[i]=mazo.popear()
             }
         }
     }
@@ -181,6 +181,7 @@ class Pila{
     vaciar(){
         let aux = [...this.cartas];
         this.cartas=[];
+        this.ultima=null;
         return aux;
     }
 
