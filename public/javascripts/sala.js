@@ -1,3 +1,4 @@
+const alertTime=3;
 window.addEventListener('load',function(){
     let socket = io.connect(location.origin);
  
@@ -9,6 +10,12 @@ window.addEventListener('load',function(){
     let deck = document.querySelector('.mazo');
     let pila = document.querySelector('.pila');
     let nickname = sessionStorage.getItem("ciegoNickname");
+    let alerta = document.querySelector('.alerta');
+    let cerrar = document.querySelector('.cerrar');
+
+    cerrar.addEventListener('click',()=>{
+        alerta.style.display = "none";
+    })
 
     let idNum;
     let enjuego = false;
@@ -200,7 +207,7 @@ window.addEventListener('load',function(){
                             socket.emit("espejito",idx);
                         }else{
                             socket.emit("equivocacion");
-                            alert("10 puntos por error")
+                            alertar("10 puntos por error");
                         }
                     }
                     
@@ -258,12 +265,15 @@ window.addEventListener('load',function(){
         cortar.addEventListener('click',()=>{
             if (Jugadores[0].turno && enjuego) {
                 socket.emit("cortar")
+                setTimeout(()=>{
+                    socket.emit("iniciar",hayPerdedor);
+                },5000)
             }
         })
 
         socket.on("cortar",({jugadores,nombre})=>{
             enjuego=false;
-            alert(nombre + " ha cortado")
+            alertar(nombre + " ha cortado")
             
             Jugadores=jugadores;
             while (Jugadores[0].id != idNum ) {
@@ -284,19 +294,27 @@ window.addEventListener('load',function(){
 
                 if (jugador.puntaje>99) {
                     hayPerdedor=true;
-                    alert("Perdedor: " + jugador.nombre)
+                    alertar("Perdedor: " + jugador.nombre)
                 }
                 
             });
 
-            setTimeout(()=>{
-                iniciar.classList.toggle("oculto");
-            },3000)
+            
         })
 // --------------------------------------------------------------------------------------------------------------------
 
 
 
     })
+// ############################################ FUNCIONES AUXILIARES #######################################################
+    function alertar(mensaje){
+        let message = document.querySelector('.message');
+        message.innerHTML=mensaje;
+        alerta.style.display = "flex";
+        setTimeout(()=>{
+            alerta.style.display = "none";
+        },alertTime*1000)
+    }
+// ############################################ FUNCIONES AUXILIARES #######################################################
 
 });

@@ -18,6 +18,30 @@ a {
   display: none;
 }
 
+.alerta{
+  position: absolute;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  height: 30%;
+  width: 30%;
+  z-index: 1;
+  border: black 2px solid;
+  top: 20%;
+  right: 35%;
+  background-color: rgb(180, 188, 204);
+}
+
+.cerrar{
+  position: absolute;
+  bottom: 5%;
+  right: 5%;
+}
+
+.message{
+  font-size: 1.5rem;
+}
+
 main{
   height: 100%;
   width: 100%;
