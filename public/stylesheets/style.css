@@ -39,7 +39,8 @@ a {
 }
 
 .message{
-  font-size: 1.5rem;
+  font-size: 1.2rem;
+  text-align: center;
 }
 
 main{
@@ -138,9 +139,11 @@ main{
 }
 
 .carta{
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 20%;
   height: 45%;
-  /* border: black double 1px; */
 }
 
  .carta1{
@@ -168,6 +171,9 @@ main{
 }
 
  .carta5{
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: absolute;
   bottom: 20%;
   right: -35%;
@@ -182,6 +188,9 @@ img{
 }
 
 .mazo{
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: absolute;
   top: 40%;
   right: 40%;

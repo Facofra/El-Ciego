@@ -1,4 +1,4 @@
-const alertTime=3;
+const alertTime=5;
 window.addEventListener('load',function(){
     let socket = io.connect(location.origin);
  
@@ -75,7 +75,7 @@ window.addEventListener('load',function(){
         })
         socket.on("iniciar",({mazo,stack})=>{
             Pila=stack;
-            iniciar.classList.toggle("oculto");
+            iniciar.style.display = "none";
             Mazo = mazo;
             cartasEnMazo.innerHTML = mazo.cartas.length;
             pila.innerHTML="";
@@ -207,7 +207,6 @@ window.addEventListener('load',function(){
                             socket.emit("espejito",idx);
                         }else{
                             socket.emit("equivocacion");
-                            alertar("10 puntos por error");
                         }
                     }
                     
@@ -249,6 +248,7 @@ window.addEventListener('load',function(){
         })
 
         socket.on("equivocacion",(jugador)=>{
+            alertar(jugador.nombre + ` se equivoco con espejito <br> 10 puntos por el error`);
             Jugadores.forEach((j,i)=>{
                 if (j.id == jugador.id) {
                     Jugadores[i]=jugador;
@@ -263,8 +263,8 @@ window.addEventListener('load',function(){
         let cortar = document.querySelector('.cortar');
 
         cortar.addEventListener('click',()=>{
-            if (Jugadores[0].turno && enjuego) {
-                socket.emit("cortar")
+            if (Jugadores[0].turno && enjuego && Jugadores[0].cartaTemporal==null) {
+                socket.emit("cortar");
                 setTimeout(()=>{
                     socket.emit("iniciar",hayPerdedor);
                 },5000)

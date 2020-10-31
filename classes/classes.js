@@ -93,7 +93,7 @@ class Jugador{
 class Partida{
     constructor(){
         this.jugadores=[];
-        this.turno=null;
+        this.turno=0;
     }
 
     sumarJugador(jugador){
@@ -105,7 +105,6 @@ class Partida{
     }
 
     iniciar(mazo){
-        this.turno = 0;
         this.jugadores[this.turno].turno=true;
         this.repartir(mazo);
     }
@@ -158,7 +157,7 @@ class Partida{
             default:
                 break;
         }
-
+        this.proximoTurno();
     }
 }
 

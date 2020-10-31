@@ -6,7 +6,7 @@ function findById(id,jugadores){
   }
 }
 
-let {Pila,Jugador,Partida,Mazo,Carta}= require("../classes/classes");
+let {Pila,Jugador,Partida,Mazo}= require("../classes/classes");
 
 module.exports={
     index: function(io){
@@ -18,7 +18,7 @@ module.exports={
 
         io.sockets.on('connection',(socket)=>{
             // io.sockets.emit("initPila",pila);
-            
+            console.log("usuario conectado: " + socket.id);
             socket.on('listarme',nombre=>{
               io.sockets.emit('conexion',io.engine.clientsCount);
 
