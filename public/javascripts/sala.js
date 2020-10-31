@@ -19,7 +19,7 @@ window.addEventListener('load',function(){
     })
 
     let idNum;
-    let enjuego = false;
+    let enJuego = false;
     let hayPerdedor=false;
     let reemplazoHecho=false;
 
@@ -121,8 +121,9 @@ window.addEventListener('load',function(){
                 setTimeout(()=>{
                     cartas.forEach((carta,idx)=>{
                         carta.innerHTML= `<img src="/images/cartas/dorso.png" alt="">`;
-                        enjuego=true;                  
+                        enJuego=true;                  
                     })  
+                    indicarTurno(players)
                 },5000)
             }
 
@@ -131,7 +132,7 @@ window.addEventListener('load',function(){
         
 // ##################### tomar mazo ############################################################################
         deck.addEventListener('click',()=>{
-            if (Jugadores[0].turno && Jugadores[0].cartaTemporal==null && Mazo.cartas.length>0 && enjuego) {
+            if (Jugadores[0].turno && Jugadores[0].cartaTemporal==null && Mazo.cartas.length>0 && enJuego) {
                 cortar.style.display="none";
                 socket.emit("tomar",idNum);
             }
@@ -159,16 +160,18 @@ window.addEventListener('load',function(){
 // ------------------------depositar en pila -------------------------------------------------------------------
 
         pila.addEventListener("click",()=>{
-            if (Jugadores[0].cartaTemporal!=null && enjuego) {
-                carta5.innerHTML="";
-                Jugadores[0].cartaTemporal=null;
-                socket.emit("apilar",idNum);
-
-            } else if (Jugadores[0].turno && Pila.cartas.length > 0 && enjuego) {
-                carta5.innerHTML = pila.innerHTML;
-                Jugadores[0].cartaTemporal= Pila.ultima;
-                cortar.style.display="none";
-                socket.emit("desapilar",idNum);
+            if (enJuego) {
+                if (Jugadores[0].cartaTemporal!=null) {
+                    carta5.innerHTML="";
+                    Jugadores[0].cartaTemporal=null;
+                    socket.emit("apilar",idNum);
+    
+                } else if (Jugadores[0].turno && Pila.cartas.length > 0) {
+                    carta5.innerHTML = pila.innerHTML;
+                    Jugadores[0].cartaTemporal= Pila.ultima;
+                    cortar.style.display="none";
+                    socket.emit("desapilar",idNum);
+                }
             }
 
         })
@@ -189,6 +192,8 @@ window.addEventListener('load',function(){
                     }
                 }
             }
+
+            indicarTurno(players)
         })
         socket.on("desapilar",data=>{
             Pila = data;
@@ -205,7 +210,7 @@ window.addEventListener('load',function(){
 // ##################################### reemplazar mano por carta en mesa y espejito ####################################################
         misCartas.forEach((carta,idx)=>{
             carta.addEventListener("click",function(){
-                if (Jugadores[0].mano[idx]!=null && enjuego) {
+                if (Jugadores[0].mano[idx]!=null && enJuego) {
                     if (Jugadores[0].turno && Jugadores[0].cartaTemporal!=null && !reemplazoHecho) {
                         reemplazoHecho=true;
                         socket.emit("reemplazo",idx);
@@ -263,6 +268,8 @@ window.addEventListener('load',function(){
                 carta5.innerHTML = "";
             }
             pila.innerHTML= `<img src="/images/cartas/${Pila.ultima.imagen}" alt=""></img>`;
+
+            indicarTurno(players)
         })
 
         socket.on("equivocacion",(jugador)=>{
@@ -281,7 +288,7 @@ window.addEventListener('load',function(){
         
 
         cortar.addEventListener('click',()=>{
-            if (Jugadores[0].turno && enjuego && Jugadores[0].cartaTemporal==null) {
+            if (Jugadores[0].turno && enJuego && Jugadores[0].cartaTemporal==null) {
                 cortar.style.display="none";
                 socket.emit("cortar");
                 setTimeout(()=>{
@@ -291,7 +298,7 @@ window.addEventListener('load',function(){
         })
 
         socket.on("cortar",({jugadores,nombre})=>{
-            enjuego=false;
+            enJuego=false;
             alertar(nombre + " ha cortado")
             
             Jugadores=jugadores;
@@ -317,7 +324,10 @@ window.addEventListener('load',function(){
                 }
                 
             });
-
+            Jugadores.forEach((e,i) => {
+                players[i].style.borderColor="black";
+                console.log("me meti");
+            });
             
         })
 // --------------------------------------------------------------------------------------------------------------------
@@ -334,6 +344,17 @@ window.addEventListener('load',function(){
             alerta.style.display = "none";
         },alertTime*1000)
     }
+
+    function indicarTurno(players){
+        Jugadores.forEach((jugador,i) => {
+            if (Jugadores[i].turno) {
+                players[i].style.borderColor="goldenrod";
+            }else{
+                players[i].style.borderColor="black";
+            }
+        });
+    }
 // ############################################ FUNCIONES AUXILIARES #######################################################
 
 });
+
