@@ -12,6 +12,7 @@ window.addEventListener('load',function(){
     let nickname = sessionStorage.getItem("ciegoNickname");
     let alerta = document.querySelector('.alerta');
     let cerrar = document.querySelector('.cerrar');
+    let cortar = document.querySelector('.cortar');
 
     cerrar.addEventListener('click',()=>{
         alerta.style.display = "none";
@@ -20,6 +21,7 @@ window.addEventListener('load',function(){
     let idNum;
     let enjuego = false;
     let hayPerdedor=false;
+    let reemplazoHecho=false;
 
 // estructas que vienen del server   
     let Mazo;
@@ -32,7 +34,6 @@ window.addEventListener('load',function(){
     let jugador1=document.querySelector('.jugador1');
     let carta5 = document.querySelector('.carta5');
     let misCartas=jugador1.querySelectorAll('.carta');
-    let reemplazoHecho=false;
 
     let jugador2=document.querySelector('.jugador2');
     let jugador3=document.querySelector('.jugador3');
@@ -103,6 +104,9 @@ window.addEventListener('load',function(){
 
                 if (Jugadores[i].turno) {
                     turnoNombre.innerHTML = Jugadores[i].nombre;
+                    if (Jugadores[i].id == idNum) {
+                        cortar.style.display="unset";
+                    }
                 }
 
                 let cartas =players[i].querySelectorAll('.carta');
@@ -128,6 +132,7 @@ window.addEventListener('load',function(){
 // ##################### tomar mazo ############################################################################
         deck.addEventListener('click',()=>{
             if (Jugadores[0].turno && Jugadores[0].cartaTemporal==null && Mazo.cartas.length>0 && enjuego) {
+                cortar.style.display="none";
                 socket.emit("tomar",idNum);
             }
         })
@@ -158,18 +163,32 @@ window.addEventListener('load',function(){
                 carta5.innerHTML="";
                 Jugadores[0].cartaTemporal=null;
                 socket.emit("apilar",idNum);
-                socket.emit("proxTurno");
 
             } else if (Jugadores[0].turno && Pila.cartas.length > 0 && enjuego) {
                 carta5.innerHTML = pila.innerHTML;
                 Jugadores[0].cartaTemporal= Pila.ultima;
+                cortar.style.display="none";
                 socket.emit("desapilar",idNum);
             }
 
         })
-        socket.on("apilar",data=>{
+        socket.on("apilar",({data,jugadores})=>{
             Pila = data;
             pila.innerHTML= `<img src="/images/cartas/${Pila.ultima.imagen}" alt=""></img>`;
+
+            Jugadores=jugadores;
+            reemplazoHecho=false;
+            while (Jugadores[0].id != idNum ) {
+                Jugadores.push(Jugadores.shift());
+            }
+            for (const jugador of Jugadores) {
+                if (jugador.turno) {
+                    turnoNombre.innerHTML = jugador.nombre;
+                    if (jugador.id == idNum) {
+                        cortar.style.display="unset";
+                    }
+                }
+            }
         })
         socket.on("desapilar",data=>{
             Pila = data;
@@ -180,18 +199,6 @@ window.addEventListener('load',function(){
             }
         })
 
-        socket.on("proxTurno",data=>{
-            Jugadores=data;
-            reemplazoHecho=false;
-            while (Jugadores[0].id != idNum ) {
-                Jugadores.push(Jugadores.shift());
-            }
-            for (const jugador of Jugadores) {
-                if (jugador.turno) {
-                    turnoNombre.innerHTML = jugador.nombre;
-                }
-            }
-        })
 
 // -----------------------------------------------------------------------------------------------------------------------
 
@@ -201,7 +208,7 @@ window.addEventListener('load',function(){
                 if (Jugadores[0].mano[idx]!=null && enjuego) {
                     if (Jugadores[0].turno && Jugadores[0].cartaTemporal!=null && !reemplazoHecho) {
                         reemplazoHecho=true;
-                        socket.emit("reemplazo",idx)
+                        socket.emit("reemplazo",idx);
                     }else if(Pila.ultima !=null){
                         if (Jugadores[0].mano[idx].numero == Pila.ultima.numero) {
                             socket.emit("espejito",idx);
@@ -235,20 +242,31 @@ window.addEventListener('load',function(){
             }
 
         })
-        socket.on("reemplazo",({jugador,indice})=>{
-            Jugadores.forEach((j,i)=>{
-                if (j.id == jugador.id) {
-                    Jugadores[i]=jugador;
-                }
-            })
+        socket.on("reemplazo",({jugadorId,stack,jugadores})=>{
+            Pila = stack;
 
-            if(jugador.id == idNum){
-                carta5.innerHTML = `<img src="/images/cartas/dorso.png" alt="">` ;
+            Jugadores=jugadores;
+            reemplazoHecho=false;
+            while (Jugadores[0].id != idNum ) {
+                Jugadores.push(Jugadores.shift());
             }
+            for (const jugador of Jugadores) {
+                if (jugador.turno) {
+                    turnoNombre.innerHTML = jugador.nombre;
+                    if (jugador.id == idNum) {
+                        cortar.style.display="unset";
+                    }
+                }
+            }
+
+            if(jugadorId == idNum){
+                carta5.innerHTML = "";
+            }
+            pila.innerHTML= `<img src="/images/cartas/${Pila.ultima.imagen}" alt=""></img>`;
         })
 
         socket.on("equivocacion",(jugador)=>{
-            alertar(jugador.nombre + ` se equivoco con espejito <br> 10 puntos por el error`);
+            alertar(jugador.nombre + ` se equivocó <br> 10 puntos`);
             Jugadores.forEach((j,i)=>{
                 if (j.id == jugador.id) {
                     Jugadores[i]=jugador;
@@ -260,10 +278,11 @@ window.addEventListener('load',function(){
 // ############################################################################################################
 
 // ---------------------------------------------CORTAR-----------------------------------------------------------------------
-        let cortar = document.querySelector('.cortar');
+        
 
         cortar.addEventListener('click',()=>{
             if (Jugadores[0].turno && enjuego && Jugadores[0].cartaTemporal==null) {
+                cortar.style.display="none";
                 socket.emit("cortar");
                 setTimeout(()=>{
                     socket.emit("iniciar",hayPerdedor);

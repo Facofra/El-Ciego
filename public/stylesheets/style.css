@@ -68,6 +68,13 @@ main{
   color: blue;
 }
 
+.cortar{
+  position: absolute;
+  top: 50%;
+  left: -30%;
+  display: none;
+}
+
 .jugador2{
   -webkit-transform: rotate(270deg); /* Safari and Chrome */
   -moz-transform: rotate(270deg);   /* Firefox */

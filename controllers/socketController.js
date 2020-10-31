@@ -67,8 +67,9 @@ module.exports={
               let jugador = findById(id,partida.jugadores);
               
               pila.agregar(jugador.descartar())
+              partida.proximoTurno();
               
-              io.sockets.emit("apilar",pila)
+              io.sockets.emit("apilar",{data:pila,jugadores:partida.jugadores})
             })
             
             socket.on("desapilar",id=>{
@@ -79,15 +80,13 @@ module.exports={
               io.sockets.emit("desapilar",pila)
             })
 
-            socket.on("proxTurno",()=>{
-              partida.proximoTurno();
-              io.sockets.emit("proxTurno",partida.jugadores);
-            })
-
             socket.on("reemplazo",(indice)=>{
               let jugador = findById(socket.id,partida.jugadores);
               jugador.reemplazar(indice);
-              io.sockets.emit("reemplazo",{jugador,indice});
+              pila.agregar(jugador.descartar());
+              partida.proximoTurno();;
+
+              io.sockets.emit("reemplazo",{jugadorId:jugador.id,stack:pila,jugadores:partida.jugadores});
             })
 
             socket.on("espejito",(idx)=>{
