@@ -107,6 +107,9 @@ module.exports={
             socket.on("cortar",()=>{
               let jugador = findById(socket.id,partida.jugadores);
               partida.cortar(jugador);
+              partida.jugadores.forEach(jugador => {
+                console.log(jugador.nombre + " " + jugador.puntaje);
+              });
 
               io.sockets.emit("cortar",{jugadores:partida.jugadores,nombre:jugador.nombre})
             })

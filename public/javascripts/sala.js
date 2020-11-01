@@ -23,7 +23,7 @@ window.addEventListener('load',function(){
     let hayPerdedor=false;
     let reemplazoHecho=false;
 
-// estructas que vienen del server   
+// estructuras que vienen del server   
     let Mazo;
     let Pila;
     let Jugadores;
@@ -34,6 +34,7 @@ window.addEventListener('load',function(){
     let jugador1=document.querySelector('.jugador1');
     let carta5 = document.querySelector('.carta5');
     let misCartas=jugador1.querySelectorAll('.carta');
+    let cartasTotales = document.querySelectorAll('.carta');
 
     let jugador2=document.querySelector('.jugador2');
     let jugador3=document.querySelector('.jugador3');
@@ -57,7 +58,7 @@ window.addEventListener('load',function(){
             nombres.innerHTML="";
             for (const jugador of jugadores) {
                 if (jugador.id == idNum) {
-                    nombres.innerHTML += `<li style="color: blue;"> ${jugador.nombre} (vos) <span class="pts ${jugador.id}">0 </span></li>`
+                    nombres.innerHTML += `<li style="color: goldenrod;"> ${jugador.nombre} <span class="pts ${jugador.id}">0 </span></li>`
                 }else{
                     nombres.innerHTML += `<li > ${jugador.nombre}  <span class="pts ${jugador.id}">0 </span></li>`
                 }
@@ -67,7 +68,9 @@ window.addEventListener('load',function(){
             contador.innerHTML = data;
         })
 // ###############################################################################################
-        
+        socket.on("disconnect",()=>{
+            alert("empiezen devuelta, se desconectó")
+        })
         
 // ------------------------ iniciar juego----------------------------------------------------------------------------------------
         iniciar.addEventListener("click",()=>{
@@ -86,21 +89,12 @@ window.addEventListener('load',function(){
         
         socket.on("repartija",partida=>{
             Partida = partida;
-            Jugadores = Partida.jugadores;
+
+            actualizarJugadores(Partida.jugadores)
+
             
-
-            while (Jugadores[0].id != idNum ) {
-                Jugadores.push(Jugadores.shift());
-            }
-
-            playerNames[0].innerHTML= Jugadores[0].nombre + " (vos)"
-
-            for (let i = 1; i < Jugadores.length; i++) {
-                playerNames[i].innerHTML = Jugadores[i].nombre;
-            }
-
             for (let i = 0; i < Jugadores.length; i++) {
-
+                playerNames[i].innerHTML = Jugadores[i].nombre;
 
                 if (Jugadores[i].turno) {
                     turnoNombre.innerHTML = Jugadores[i].nombre;
@@ -178,12 +172,9 @@ window.addEventListener('load',function(){
         socket.on("apilar",({data,jugadores})=>{
             Pila = data;
             pila.innerHTML= `<img src="/images/cartas/${Pila.ultima.imagen}" alt=""></img>`;
-
-            Jugadores=jugadores;
             reemplazoHecho=false;
-            while (Jugadores[0].id != idNum ) {
-                Jugadores.push(Jugadores.shift());
-            }
+
+            actualizarJugadores(jugadores)
             for (const jugador of Jugadores) {
                 if (jugador.turno) {
                     turnoNombre.innerHTML = jugador.nombre;
@@ -249,12 +240,9 @@ window.addEventListener('load',function(){
         })
         socket.on("reemplazo",({jugadorId,stack,jugadores})=>{
             Pila = stack;
-
-            Jugadores=jugadores;
             reemplazoHecho=false;
-            while (Jugadores[0].id != idNum ) {
-                Jugadores.push(Jugadores.shift());
-            }
+
+            actualizarJugadores(jugadores)
             for (const jugador of Jugadores) {
                 if (jugador.turno) {
                     turnoNombre.innerHTML = jugador.nombre;
@@ -284,6 +272,7 @@ window.addEventListener('load',function(){
         })
 // ############################################################################################################
 
+
 // ---------------------------------------------CORTAR-----------------------------------------------------------------------
         
 
@@ -300,11 +289,8 @@ window.addEventListener('load',function(){
         socket.on("cortar",({jugadores,nombre})=>{
             enJuego=false;
             alertar(nombre + " ha cortado")
-            
-            Jugadores=jugadores;
-            while (Jugadores[0].id != idNum ) {
-                Jugadores.push(Jugadores.shift());
-            }
+
+            actualizarJugadores(jugadores)
 
             Jugadores.forEach((jugador,indice) => {
                 let puntaje=document.querySelector('.'+jugador.id);
@@ -353,6 +339,13 @@ window.addEventListener('load',function(){
                 players[i].style.borderColor="black";
             }
         });
+    }
+
+    function actualizarJugadores(jugadores) {
+        Jugadores=jugadores;
+        while (Jugadores[0].id != idNum ) {
+            Jugadores.push(Jugadores.shift());
+        }
     }
 // ############################################ FUNCIONES AUXILIARES #######################################################
 
