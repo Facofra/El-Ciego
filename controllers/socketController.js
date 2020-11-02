@@ -17,27 +17,20 @@ module.exports={
 
 
         io.sockets.on('connection',(socket)=>{
-            // io.sockets.emit("initPila",pila);
             console.log("usuario conectado: " + socket.id);
             socket.on('listarme',nombre=>{
-              io.sockets.emit('conexion',io.engine.clientsCount);
 
               let jugador = new Jugador(nombre,socket.id);
               partida.sumarJugador(jugador);
 
-              io.sockets.emit('lista',partida.jugadores);
+              io.sockets.emit('lista',{jugadores:partida.jugadores,cantidad:io.engine.clientsCount});
             })
             
             socket.on('disconnect',()=>{
               console.log("usuario desconectado: " + socket.id );
               partida.restarJugador(socket.id);
 
-              io.sockets.emit('lista',partida.jugadores);
-              io.sockets.emit('conexion',io.engine.clientsCount);
-            })
-          
-            socket.on('conversacion',(data)=>{
-              io.sockets.emit('conversacion',data)
+              io.sockets.emit('lista',{jugadores:partida.jugadores,cantidad:io.engine.clientsCount});
             })
           
             socket.on("iniciar",(hayPerdedor)=>{
@@ -45,13 +38,12 @@ module.exports={
               mazo.crear();
               mazo.mezclar();
               partida.iniciar(mazo);
-              io.sockets.emit("iniciar",{mazo,stack:pila});
               if (hayPerdedor) {
                 partida.jugadores.forEach(jugador=>{
                   jugador.puntaje=0;
                 })
               }
-              io.sockets.emit("repartija",partida);
+              io.sockets.emit("iniciar",{mazo,stack:pila,partida});
 
             })
 

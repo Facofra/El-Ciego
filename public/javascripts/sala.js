@@ -35,6 +35,8 @@ window.addEventListener('load',function(){
     let carta5 = document.querySelector('.carta5');
     let misCartas=jugador1.querySelectorAll('.carta');
     let cartasTotales = document.querySelectorAll('.carta');
+    let puntajeEnMesa= document.querySelectorAll('.puntajeEnMesa');
+    let pts= document.querySelectorAll('.pts');
 
     let jugador2=document.querySelector('.jugador2');
     let jugador3=document.querySelector('.jugador3');
@@ -42,7 +44,7 @@ window.addEventListener('load',function(){
 
 
     let players = document.querySelectorAll('.players');
-    let playerNames = document.querySelectorAll('.playerName')
+    let playerNames = document.querySelectorAll('.nombresEnMesa')
     
     if (nickname == null) {
         nickname = prompt("Nickname: ")
@@ -54,7 +56,7 @@ window.addEventListener('load',function(){
         
         socket.emit('listarme',nickname);
         
-        socket.on('lista',jugadores=>{
+        socket.on('lista',({jugadores,cantidad})=>{
             nombres.innerHTML="";
             for (const jugador of jugadores) {
                 if (jugador.id == idNum) {
@@ -63,9 +65,7 @@ window.addEventListener('load',function(){
                     nombres.innerHTML += `<li > ${jugador.nombre}  <span class="pts ${jugador.id}">0 </span></li>`
                 }
             }
-        })
-        socket.on('conexion',data=>{
-            contador.innerHTML = data;
+            contador.innerHTML = cantidad;
         })
 // ###############################################################################################
         socket.on("disconnect",()=>{
@@ -77,24 +77,24 @@ window.addEventListener('load',function(){
             socket.emit("iniciar",hayPerdedor);
             
         })
-        socket.on("iniciar",({mazo,stack})=>{
+        socket.on("iniciar",({mazo,stack,partida})=>{
             Pila=stack;
-            iniciar.style.display = "none";
             Mazo = mazo;
+            Partida = partida;
+
+            hayPerdedor=false;
+            iniciar.style.display = "none";
             cartasEnMazo.innerHTML = mazo.cartas.length;
             pila.innerHTML="";
             deck.innerHTML= `<img src="/images/cartas/dorso.png" alt="">`;
-            
-        })
-        
-        socket.on("repartija",partida=>{
-            Partida = partida;
 
             actualizarJugadores(Partida.jugadores)
-
             
             for (let i = 0; i < Jugadores.length; i++) {
                 playerNames[i].innerHTML = Jugadores[i].nombre;
+                pts[i].style.display="unset";
+                puntajeEnMesa[i].innerHTML=Jugadores[i].puntaje;
+                puntajeEnMesa[i].style.display="unset";
 
                 if (Jugadores[i].turno) {
                     turnoNombre.innerHTML = Jugadores[i].nombre;
@@ -120,8 +120,10 @@ window.addEventListener('load',function(){
                     indicarTurno(players)
                 },5000)
             }
-
+            
         })
+      
+           
 // ----------------------------------------------------------------------------------------------------------------
         
 // ##################### tomar mazo ############################################################################
@@ -209,6 +211,13 @@ window.addEventListener('load',function(){
                         if (Jugadores[0].mano[idx].numero == Pila.ultima.numero) {
                             socket.emit("espejito",idx);
                         }else{
+                            if (Jugadores[0].puntaje>=90) {
+                                enJuego=false;
+                                hayPerdedor=true;
+                                setTimeout(()=>{
+                                    socket.emit("iniciar",hayPerdedor);
+                                },5000)
+                            }
                             socket.emit("equivocacion");
                         }
                     }
@@ -265,10 +274,14 @@ window.addEventListener('load',function(){
             Jugadores.forEach((j,i)=>{
                 if (j.id == jugador.id) {
                     Jugadores[i]=jugador;
+                    puntajeEnMesa[i].innerHTML=jugador.puntaje;
                 }
             })
-            let puntaje=document.querySelector('.'+jugador.id);
-            puntaje.innerHTML=jugador.puntaje;
+            if (jugador.puntaje>99) {
+                enJuego=false;
+                hayPerdedor=true;
+                alertar("Perdedor: " + jugador.nombre)
+            }
         })
 // ############################################################################################################
 
@@ -293,9 +306,8 @@ window.addEventListener('load',function(){
             actualizarJugadores(jugadores)
 
             Jugadores.forEach((jugador,indice) => {
-                let puntaje=document.querySelector('.'+jugador.id);
-                puntaje.innerHTML=jugador.puntaje;
 
+                puntajeEnMesa[indice].innerHTML=jugador.puntaje;
                 
                 let cartas =players[indice].querySelectorAll('.carta');
                 cartas.forEach((carta,idx)=>{
@@ -312,7 +324,6 @@ window.addEventListener('load',function(){
             });
             Jugadores.forEach((e,i) => {
                 players[i].style.borderColor="black";
-                console.log("me meti");
             });
             
         })
