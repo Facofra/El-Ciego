@@ -1,4 +1,5 @@
-const alertTime=5;
+const alertTime=3;
+const cantCartas=4;
 window.addEventListener('load',function(){
     let socket = io.connect(location.origin);
  
@@ -9,19 +10,22 @@ window.addEventListener('load',function(){
     let iniciar = document.querySelector('.iniciar');
     let deck = document.querySelector('.mazo');
     let pila = document.querySelector('.pila');
-    let nickname = sessionStorage.getItem("ciegoNickname");
     let alerta = document.querySelector('.alerta');
     let cerrar = document.querySelector('.cerrar');
     let cortar = document.querySelector('.cortar');
+    let nickname = sessionStorage.getItem("ciegoNickname");
 
-    cerrar.addEventListener('click',()=>{
-        alerta.style.display = "none";
-    })
+    
 
+    let timerAlert=null;
     let idNum;
     let enJuego = false;
     let hayPerdedor=false;
     let reemplazoHecho=false;
+    let efecto1=false;
+    let efecto2=false;
+    let efecto3=false;
+    let agarradoDePila=false;
 
 // estructuras que vienen del server   
     let Mazo;
@@ -49,6 +53,10 @@ window.addEventListener('load',function(){
     if (nickname == null) {
         nickname = prompt("Nickname: ")
     }
+
+    cerrar.addEventListener('click',()=>{
+        alerta.style.display = "none";
+    })
 
     socket.on("connect",()=>{
 // ####################### conectarse ########################################################################
@@ -160,12 +168,17 @@ window.addEventListener('load',function(){
                 if (Jugadores[0].cartaTemporal!=null) {
                     carta5.innerHTML="";
                     Jugadores[0].cartaTemporal=null;
+                    efecto1=false;
+                    efecto2=false;
+                    efecto3=false;
+                    agarradoDePila=false;
                     socket.emit("apilar",idNum);
     
                 } else if (Jugadores[0].turno && Pila.cartas.length > 0) {
                     carta5.innerHTML = pila.innerHTML;
                     Jugadores[0].cartaTemporal= Pila.ultima;
                     cortar.style.display="none";
+                    agarradoDePila=true;
                     socket.emit("desapilar",idNum);
                 }
             }
@@ -204,24 +217,38 @@ window.addEventListener('load',function(){
         misCartas.forEach((carta,idx)=>{
             carta.addEventListener("click",function(){
                 if (Jugadores[0].mano[idx]!=null && enJuego) {
-                    if (Jugadores[0].turno && Jugadores[0].cartaTemporal!=null && !reemplazoHecho) {
+                    if (efecto3) {
+                        enJuego=false;
                         reemplazoHecho=true;
-                        socket.emit("reemplazo",idx);
-                    }else if(Pila.ultima !=null){
-                        if (Jugadores[0].mano[idx].numero == Pila.ultima.numero) {
-                            socket.emit("espejito",idx);
-                        }else{
-                            if (Jugadores[0].puntaje>=90) {
-                                enJuego=false;
-                                hayPerdedor=true;
-                                setTimeout(()=>{
-                                    socket.emit("iniciar",hayPerdedor);
-                                },5000)
+                        efecto3=false;
+                        carta.innerHTML = `<img src="/images/cartas/${Jugadores[0].mano[idx].imagen}" alt="">`;
+                        setTimeout(()=>{
+                            carta.innerHTML=`<img src="/images/cartas/dorso.png" alt="">`;
+                            carta5.innerHTML="";
+                            enJuego=true;
+                            agarradoDePila=false;
+                            socket.emit("apilar",idNum);
+                        },3000)
+                    }else{
+                        if (Jugadores[0].turno && Jugadores[0].cartaTemporal!=null && !reemplazoHecho) {
+                            reemplazoHecho=true;
+                            agarradoDePila=false;
+                            socket.emit("reemplazo",idx);
+                        }else if(Pila.ultima !=null){
+                            if (Jugadores[0].mano[idx].numero == Pila.ultima.numero) {
+                                socket.emit("espejito",idx);
+                            }else{
+                                if (Jugadores[0].puntaje>=90) {
+                                    enJuego=false;
+                                    hayPerdedor=true;
+                                    setTimeout(()=>{
+                                        socket.emit("iniciar",hayPerdedor);
+                                    },5000)
+                                }
+                                socket.emit("equivocacion");
                             }
-                            socket.emit("equivocacion");
                         }
                     }
-                    
                 }
             })
         })
@@ -247,19 +274,32 @@ window.addEventListener('load',function(){
             }
 
         })
-        socket.on("reemplazo",({jugadorId,stack,jugadores})=>{
+        socket.on("reemplazo",({jugadorId,stack,jugadores,indice})=>{
             Pila = stack;
             reemplazoHecho=false;
 
             actualizarJugadores(jugadores)
-            for (const jugador of Jugadores) {
+
+            Jugadores.forEach((jugador,i) => {
                 if (jugador.turno) {
                     turnoNombre.innerHTML = jugador.nombre;
                     if (jugador.id == idNum) {
                         cortar.style.display="unset";
                     }
                 }
-            }
+                if (jugador.id == jugadorId) {
+                    let cartas =players[i].querySelectorAll('.carta');
+                    cartas.forEach((carta,idx) => {
+                        if (idx == indice) {
+                            carta.style.outline="goldenrod 3px solid";
+                            setTimeout(()=>{
+                                carta.style.outline="";
+                            },2000)
+                        }
+                    });
+                }
+                
+            });
 
             if(jugadorId == idNum){
                 carta5.innerHTML = "";
@@ -283,6 +323,40 @@ window.addEventListener('load',function(){
                 alertar("Perdedor: " + jugador.nombre)
             }
         })
+// ############################################################################################################
+
+//----------------------------------------- EFECTOS DE CARTAS ---------------------------------------------------------
+        carta5.addEventListener("click",()=>{
+            if (Jugadores[0].turno && enJuego && Jugadores[0].cartaTemporal!=null && !agarradoDePila) {
+                switch (Jugadores[0].cartaTemporal.numero) {
+                    // case 1:
+                    //     efectoUno();
+                    //     break;
+                    // case 2:
+                    //     efectoDos();
+                    //     break;
+                    case 3:
+                        efectoTres();
+                        break;
+                
+                    default:
+                        break;
+                }
+            }
+        })
+//----------------------------------------------------------------------------------------------------------------
+
+// ################################## TOCAR CARTA DEL OPONENTE ######################################################
+        // cartasTotales.forEach((carta,i) => {
+        //     carta.addEventListener('click',()=>{
+        //         if (efecto2) {
+        //             efecto2=false;
+        //             let numJugador=Math.floor(i/cantCartas);
+        //             let numCarta = i%cantCartas;
+        //             console.log(Jugadores[numJugador].mano[numCarta]);
+        //         }
+        //     })
+        // });
 // ############################################################################################################
 
 
@@ -333,13 +407,18 @@ window.addEventListener('load',function(){
 
     })
 // ############################################ FUNCIONES AUXILIARES #######################################################
-    function alertar(mensaje){
+    function alertar(mensaje,tiempo=alertTime){
         let message = document.querySelector('.message');
         message.innerHTML=mensaje;
         alerta.style.display = "flex";
-        setTimeout(()=>{
+        if (timerAlert!=null) {
+            clearTimeout(timerAlert);
+        }
+
+        timerAlert = setTimeout(()=>{
             alerta.style.display = "none";
-        },alertTime*1000)
+            timerAlert=null;
+        },tiempo*1000)
     }
 
     function indicarTurno(players){
@@ -357,6 +436,16 @@ window.addEventListener('load',function(){
         while (Jugadores[0].id != idNum ) {
             Jugadores.push(Jugadores.shift());
         }
+    }
+    function efectoUno(){}
+    function efectoDos(){
+        efecto2=true;
+        alertar("Click en carta de oponente para verla");
+    }
+
+    function efectoTres(){
+        efecto3=true;
+        alertar("click en una de tus cartas para verla");
     }
 // ############################################ FUNCIONES AUXILIARES #######################################################
 

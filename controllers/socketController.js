@@ -78,7 +78,7 @@ module.exports={
               pila.agregar(jugador.descartar());
               partida.proximoTurno();;
 
-              io.sockets.emit("reemplazo",{jugadorId:jugador.id,stack:pila,jugadores:partida.jugadores});
+              io.sockets.emit("reemplazo",{jugadorId:jugador.id,stack:pila,jugadores:partida.jugadores,indice});
             })
 
             socket.on("espejito",(idx)=>{
