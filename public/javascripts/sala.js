@@ -26,6 +26,7 @@ window.addEventListener('load',function(){
     let efecto2=false;
     let efecto3=false;
     let agarradoDePila=false;
+    let espejitoHecho=false;
 
 // estructuras que vienen del server   
     let Mazo;
@@ -68,9 +69,9 @@ window.addEventListener('load',function(){
             nombres.innerHTML="";
             for (const jugador of jugadores) {
                 if (jugador.id == idNum) {
-                    nombres.innerHTML += `<li style="color: goldenrod;"> ${jugador.nombre} <span class="pts ${jugador.id}">0 </span></li>`
+                    nombres.innerHTML += `<li style="color: blue;"> ${jugador.nombre} </li>`
                 }else{
-                    nombres.innerHTML += `<li > ${jugador.nombre}  <span class="pts ${jugador.id}">0 </span></li>`
+                    nombres.innerHTML += `<li > ${jugador.nombre} </li>`
                 }
             }
             contador.innerHTML = cantidad;
@@ -174,7 +175,7 @@ window.addEventListener('load',function(){
                     agarradoDePila=false;
                     socket.emit("apilar",idNum);
     
-                } else if (Jugadores[0].turno && Pila.cartas.length > 0) {
+                } else if (Jugadores[0].turno && Pila.cartas.length > 0 && !espejitoHecho) {
                     carta5.innerHTML = pila.innerHTML;
                     Jugadores[0].cartaTemporal= Pila.ultima;
                     cortar.style.display="none";
@@ -188,6 +189,7 @@ window.addEventListener('load',function(){
             Pila = data;
             pila.innerHTML= `<img src="/images/cartas/${Pila.ultima.imagen}" alt=""></img>`;
             reemplazoHecho=false;
+            espejitoHecho=false;
 
             actualizarJugadores(jugadores)
             for (const jugador of Jugadores) {
@@ -200,6 +202,13 @@ window.addEventListener('load',function(){
             }
 
             indicarTurno(players)
+            if (Mazo.cartas.length == 0 && Jugadores[0].id == idNum) {
+                let finMazo=true;
+                socket.emit("cortar",finMazo);
+                setTimeout(()=>{
+                    socket.emit("iniciar",hayPerdedor);
+                },5000)
+            }
         })
         socket.on("desapilar",data=>{
             Pila = data;
@@ -256,6 +265,7 @@ window.addEventListener('load',function(){
         socket.on("espejito",({data,jugador})=>{
             Pila = data;
             pila.innerHTML= `<img src="/images/cartas/${Pila.ultima.imagen}" alt=""></img>`;
+            espejitoHecho=true;
             Jugadores.forEach((j,i)=>{
                 if (j.id == jugador.id) {
                     Jugadores[i]=jugador;
@@ -307,6 +317,13 @@ window.addEventListener('load',function(){
             pila.innerHTML= `<img src="/images/cartas/${Pila.ultima.imagen}" alt=""></img>`;
 
             indicarTurno(players)
+            if (Mazo.cartas.length == 0 && Jugadores[0].id == idNum) {
+                let finMazo=true;
+                socket.emit("cortar",finMazo);
+                setTimeout(()=>{
+                    socket.emit("iniciar",hayPerdedor);
+                },5000)
+            }
         })
 
         socket.on("equivocacion",(jugador)=>{
@@ -366,7 +383,8 @@ window.addEventListener('load',function(){
         cortar.addEventListener('click',()=>{
             if (Jugadores[0].turno && enJuego && Jugadores[0].cartaTemporal==null) {
                 cortar.style.display="none";
-                socket.emit("cortar");
+                let finMazo=false;
+                socket.emit("cortar",finMazo);
                 setTimeout(()=>{
                     socket.emit("iniciar",hayPerdedor);
                 },5000)

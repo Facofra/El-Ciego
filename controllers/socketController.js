@@ -96,12 +96,9 @@ module.exports={
               io.sockets.emit("equivocacion",jugador);
             })
 
-            socket.on("cortar",()=>{
+            socket.on("cortar",(finMazo)=>{
               let jugador = findById(socket.id,partida.jugadores);
-              partida.cortar(jugador);
-              partida.jugadores.forEach(jugador => {
-                console.log(jugador.nombre + " " + jugador.puntaje);
-              });
+              partida.cortar(jugador,finMazo);
 
               io.sockets.emit("cortar",{jugadores:partida.jugadores,nombre:jugador.nombre})
             })

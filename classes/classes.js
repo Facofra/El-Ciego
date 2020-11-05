@@ -61,6 +61,16 @@ class Jugador{
         this.cartaTemporal= pilaOMazo.popear();
     }
 
+    handIsEmpty(){
+        let vacio=true;
+        for (const carta of this.mano) {
+            if (carta!=null) {
+                return false;
+            }
+        }
+        return vacio;
+    }
+
     descartar(){
         let aux = this.cartaTemporal;
         this.cartaTemporal=null;
@@ -127,21 +137,24 @@ class Partida{
         }
     }
 
-    cortar(jugador){
+    cortar(jugador,finMazo=false){
         let esMenor='<';
-        for (const player of this.jugadores) {
-            if (player == jugador) {
-                continue;
-            }
-            player.puntaje+= player.valorCartas();
-
-            if (jugador.valorCartas() > player.valorCartas()) {
-                esMenor = '>';
-            }else if(jugador.valorCartas() == player.valorCartas() && esMenor != '>'){
-                esMenor = '='
+        if (finMazo) {
+            esMenor='x';
+        }else{
+            for (const player of this.jugadores) {
+                if (player == jugador) {
+                    continue;
+                }
+                if (jugador.valorCartas() > player.valorCartas()) {
+                    esMenor = '>';
+                    break;
+                }else if(jugador.valorCartas() == player.valorCartas()){
+                    esMenor = '=';
+                }
             }
         }
-
+        
         switch (esMenor) {
             case '>':
                 jugador.puntaje+=25;
@@ -149,10 +162,21 @@ class Partida{
                 break;
             case '<':
                 jugador.puntaje+=-10;
+                for (const player of this.jugadores) {
+                    if (player == jugador) {
+                        continue;
+                    }
+                    player.puntaje+= player.valorCartas();
+                }
             break;
             case '=':
                 jugador.puntaje+=10;
                 jugador.puntaje+= jugador.valorCartas();
+                break;
+            case 'x':
+                for (const player of this.jugadores) {
+                    player.puntaje+= player.valorCartas();
+                }
                 break;
             default:
                 break;
