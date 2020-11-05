@@ -72,13 +72,13 @@ module.exports={
               io.sockets.emit("desapilar",pila)
             })
 
-            socket.on("reemplazo",(indice)=>{
+            socket.on("reemplazo",(indiceDeCarta)=>{
               let jugador = findById(socket.id,partida.jugadores);
-              jugador.reemplazar(indice);
+              jugador.reemplazar(indiceDeCarta);
               pila.agregar(jugador.descartar());
               partida.proximoTurno();;
 
-              io.sockets.emit("reemplazo",{jugadorId:jugador.id,stack:pila,jugadores:partida.jugadores,indice});
+              io.sockets.emit("reemplazo",{jugadorId:jugador.id,stack:pila,jugadores:partida.jugadores,indiceDeCarta});
             })
 
             socket.on("espejito",(idx)=>{
@@ -101,6 +101,11 @@ module.exports={
               partida.cortar(jugador,finMazo);
 
               io.sockets.emit("cortar",{jugadores:partida.jugadores,nombre:jugador.nombre})
+            })
+
+            socket.on("efecto2",(data)=>{
+
+              socket.broadcast.emit("efecto2",data);
             })
 
 

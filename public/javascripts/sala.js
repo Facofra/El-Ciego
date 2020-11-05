@@ -1,5 +1,7 @@
 const alertTime=3;
+const colorTime=3;
 const cantCartas=4;
+const cantJugadoresMax=4;
 window.addEventListener('load',function(){
     let socket = io.connect(location.origin);
  
@@ -158,6 +160,8 @@ window.addEventListener('load',function(){
             if (Mazo.cartas.length == 0) {
                 deck.innerHTML="Mazo vacío";
             }
+
+            colorearElemento(deck,1);
             
         })
 // ############################################################################################################
@@ -217,6 +221,7 @@ window.addEventListener('load',function(){
             }else{
                 pila.innerHTML= `<img src="/images/cartas/${Pila.ultima.imagen}" alt=""></img>`
             }
+            colorearElemento(pila,1);
         })
 
 
@@ -239,7 +244,7 @@ window.addEventListener('load',function(){
                             socket.emit("apilar",idNum);
                         },3000)
                     }else{
-                        if (Jugadores[0].turno && Jugadores[0].cartaTemporal!=null && !reemplazoHecho) {
+                        if (Jugadores[0].turno && Jugadores[0].cartaTemporal!=null && !reemplazoHecho && !efecto2) {
                             reemplazoHecho=true;
                             agarradoDePila=false;
                             socket.emit("reemplazo",idx);
@@ -284,7 +289,7 @@ window.addEventListener('load',function(){
             }
 
         })
-        socket.on("reemplazo",({jugadorId,stack,jugadores,indice})=>{
+        socket.on("reemplazo",({jugadorId,stack,jugadores,indiceDeCarta})=>{
             Pila = stack;
             reemplazoHecho=false;
 
@@ -300,11 +305,8 @@ window.addEventListener('load',function(){
                 if (jugador.id == jugadorId) {
                     let cartas =players[i].querySelectorAll('.carta');
                     cartas.forEach((carta,idx) => {
-                        if (idx == indice) {
-                            carta.style.outline="goldenrod 3px solid";
-                            setTimeout(()=>{
-                                carta.style.outline="";
-                            },2000)
+                        if (idx == indiceDeCarta) {
+                            colorearElemento(carta);
                         }
                     });
                 }
@@ -349,9 +351,9 @@ window.addEventListener('load',function(){
                     // case 1:
                     //     efectoUno();
                     //     break;
-                    // case 2:
-                    //     efectoDos();
-                    //     break;
+                    case 2:
+                        efectoDos();
+                        break;
                     case 3:
                         efectoTres();
                         break;
@@ -364,16 +366,42 @@ window.addEventListener('load',function(){
 //----------------------------------------------------------------------------------------------------------------
 
 // ################################## TOCAR CARTA DEL OPONENTE ######################################################
-        // cartasTotales.forEach((carta,i) => {
-        //     carta.addEventListener('click',()=>{
-        //         if (efecto2) {
-        //             efecto2=false;
-        //             let numJugador=Math.floor(i/cantCartas);
-        //             let numCarta = i%cantCartas;
-        //             console.log(Jugadores[numJugador].mano[numCarta]);
-        //         }
-        //     })
-        // });
+        cartasTotales.forEach((carta,i) => {
+            carta.addEventListener('click',()=>{
+                let numJugador=Math.floor(i/cantJugadoresMax);
+                if (efecto2 && numJugador!=0 && numJugador< Jugadores.length) {
+                    efecto2=false;
+                    enJuego=false;
+                    reemplazoHecho=true;
+
+                    let numCarta = i%cantCartas;
+                    carta.innerHTML= `<img src="/images/cartas/${Jugadores[numJugador].mano[numCarta].imagen}" alt="">`;
+                    //emitir socket de coloreo que muestre que carta vio.
+                    socket.emit("efecto2",{
+                        nombreJugador: Jugadores[0].nombre,
+                        numeroCarta: numCarta,
+                        oponenteId:Jugadores[numJugador].id
+                    });
+                    setTimeout(()=>{
+                        carta.innerHTML= `<img src="/images/cartas/dorso.png" alt="">`;
+                        carta5.innerHTML="";
+                        enJuego=true;
+                        agarradoDePila=false;
+                        socket.emit("apilar",idNum);
+                    },3000);
+                }
+            })
+        });
+
+        socket.on("efecto2",(data)=>{
+            alertar(data.nombreJugador + " uso efecto 2 y vio carta del oponente");
+            Jugadores.forEach((jugador,i) => {
+                if (jugador.id == data.oponenteId) {
+                    let cartasOponente = players[i].querySelectorAll('.carta');
+                    colorearElemento(cartasOponente[data.numeroCarta]);
+                }
+            });
+        });
 // ############################################################################################################
 
 
@@ -455,6 +483,14 @@ window.addEventListener('load',function(){
             Jugadores.push(Jugadores.shift());
         }
     }
+
+    function colorearElemento(cosa,tiempo=colorTime){
+        cosa.style.outline="goldenrod 3px solid";
+        setTimeout(()=>{
+            cosa.style.outline="";
+        },1000*tiempo)
+    }
+
     function efectoUno(){}
     function efectoDos(){
         efecto2=true;
