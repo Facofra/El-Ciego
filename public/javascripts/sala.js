@@ -25,6 +25,13 @@ window.addEventListener('load',function(){
     let hayPerdedor=false;
     let reemplazoHecho=false;
     let efecto1=false;
+    let efecto1aux={
+        activado:false,
+        cartaOponente:null,
+        cartaMia:null,
+        idMio:null,
+        idOponente:null
+    };
     let efecto2=false;
     let efecto3=false;
     let agarradoDePila=false;
@@ -170,16 +177,13 @@ window.addEventListener('load',function(){
 
         pila.addEventListener("click",()=>{
             if (enJuego) {
-                if (Jugadores[0].cartaTemporal!=null) {
+                if (Jugadores[0].cartaTemporal!=null &&!efecto1 &&!efecto2 &&!efecto3 &&!efecto1aux.activado) {
                     carta5.innerHTML="";
                     Jugadores[0].cartaTemporal=null;
-                    efecto1=false;
-                    efecto2=false;
-                    efecto3=false;
                     agarradoDePila=false;
                     socket.emit("apilar",idNum);
     
-                } else if (Jugadores[0].turno && Pila.cartas.length > 0 && !espejitoHecho) {
+                } else if (Jugadores[0].turno && Pila.cartas.length > 0 && !espejitoHecho &&!efecto1 &&!efecto2 &&!efecto3 &&!efecto1aux.activado) {
                     carta5.innerHTML = pila.innerHTML;
                     Jugadores[0].cartaTemporal= Pila.ultima;
                     cortar.style.display="none";
@@ -231,7 +235,19 @@ window.addEventListener('load',function(){
         misCartas.forEach((carta,idx)=>{
             carta.addEventListener("click",function(){
                 if (Jugadores[0].mano[idx]!=null && enJuego) {
-                    if (efecto3) {
+                    if (efecto1aux.activado) {
+                        enJuego=false;
+                        efecto1aux.activado=false;
+                        efecto1aux.cartaMia=idx;
+                        socket.emit("efecto1",efecto1aux);
+                        setTimeout(()=>{
+                            carta5.innerHTML="";
+                            enJuego=true;
+                            agarradoDePila=false;
+                            socket.emit("apilar",idNum);
+                        },3000)
+                    }
+                    else if (efecto3) {
                         enJuego=false;
                         reemplazoHecho=true;
                         efecto3=false;
@@ -244,7 +260,7 @@ window.addEventListener('load',function(){
                             socket.emit("apilar",idNum);
                         },3000)
                     }else{
-                        if (Jugadores[0].turno && Jugadores[0].cartaTemporal!=null && !reemplazoHecho && !efecto2) {
+                        if (Jugadores[0].turno && Jugadores[0].cartaTemporal!=null && !reemplazoHecho && !efecto2 && !efecto1) {
                             reemplazoHecho=true;
                             agarradoDePila=false;
                             socket.emit("reemplazo",idx);
@@ -348,9 +364,9 @@ window.addEventListener('load',function(){
         carta5.addEventListener("click",()=>{
             if (Jugadores[0].turno && enJuego && Jugadores[0].cartaTemporal!=null && !agarradoDePila) {
                 switch (Jugadores[0].cartaTemporal.numero) {
-                    // case 1:
-                    //     efectoUno();
-                    //     break;
+                    case 1:
+                        efectoUno();
+                        break;
                     case 2:
                         efectoDos();
                         break;
@@ -369,7 +385,7 @@ window.addEventListener('load',function(){
         cartasTotales.forEach((carta,i) => {
             carta.addEventListener('click',()=>{
                 let numJugador=Math.floor(i/cantJugadoresMax);
-                if (efecto2 && numJugador!=0 && numJugador< Jugadores.length) {
+                if (efecto2 && numJugador!=0 && numJugador< Jugadores.length && carta.innerHTML!="") {
                     efecto2=false;
                     enJuego=false;
                     reemplazoHecho=true;
@@ -389,6 +405,14 @@ window.addEventListener('load',function(){
                         agarradoDePila=false;
                         socket.emit("apilar",idNum);
                     },3000);
+                }else if (efecto1 && numJugador !=0 && numJugador < Jugadores.length && carta.innerHTML!="") {
+                    efecto1=false;
+                    efecto1aux.activado=true;
+                    reemplazoHecho=true;
+                    efecto1aux.cartaOponente= i%cantCartas;
+                    efecto1aux.idOponente=Jugadores[numJugador].id;
+                    efecto1aux.idMio=idNum;
+                    colorearElemento(carta,5);
                 }
             })
         });
@@ -402,6 +426,21 @@ window.addEventListener('load',function(){
                 }
             });
         });
+
+        socket.on("efecto1",(datos)=>{
+            actualizarJugadores(datos.jugadores);
+            alertar(datos.nombreJugador + " intercambio carta con " + datos.nombreOponente);
+            Jugadores.forEach((jugador,i) => {
+                if (jugador.id == datos.data.idOponente) {
+                    let cartas = players[i].querySelectorAll('.carta');
+                    colorearElemento(cartas[datos.data.cartaOponente]);
+                }
+                if (jugador.id == datos.data.idMio) {
+                    let cartas = players[i].querySelectorAll('.carta');
+                    colorearElemento(cartas[datos.data.cartaMia]);
+                }
+            });
+        })
 // ############################################################################################################
 
 
@@ -491,7 +530,10 @@ window.addEventListener('load',function(){
         },1000*tiempo)
     }
 
-    function efectoUno(){}
+    function efectoUno(){
+        efecto1=true;
+        alertar("Click en carta de oponente para cambiar por una tuya");
+    }
     function efectoDos(){
         efecto2=true;
         alertar("Click en carta de oponente para verla");

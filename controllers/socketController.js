@@ -108,6 +108,24 @@ module.exports={
               socket.broadcast.emit("efecto2",data);
             })
 
+            socket.on("efecto1",(data)=>{
+              let jugador = findById(socket.id,partida.jugadores);
+              let oponente = findById(data.idOponente,partida.jugadores);
+              oponente.cartaTemporal = jugador.mano[data.cartaMia];
+              oponente.reemplazar(data.cartaOponente);
+              jugador.mano[data.cartaMia] = oponente.cartaTemporal;
+              oponente.cartaTemporal=null;
+
+              let datos={
+                jugadores:partida.jugadores,
+                data,
+                nombreOponente:oponente.nombre,
+                nombreJugador: jugador.nombre
+              }
+
+              io.sockets.emit("efecto1",datos);
+            })
+
 
           
           
