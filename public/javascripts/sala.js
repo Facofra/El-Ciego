@@ -308,6 +308,7 @@ window.addEventListener('load',function(){
         socket.on("reemplazo",({jugadorId,stack,jugadores,indiceDeCarta})=>{
             Pila = stack;
             reemplazoHecho=false;
+            espejitoHecho=false;
 
             actualizarJugadores(jugadores)
 
