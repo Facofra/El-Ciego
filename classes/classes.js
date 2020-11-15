@@ -23,6 +23,11 @@ class Mazo{
                 this.agregar(new Carta(i%13+1,palo));
             }
         }
+        for (let i = 0; i < 2; i++) {
+            let carta = new Carta(0,"comodin");
+            carta.imagen="comodin.png";
+            this.agregar(carta);          
+        }
     }
 
     agregar(carta){
