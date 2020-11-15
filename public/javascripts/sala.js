@@ -251,6 +251,7 @@ window.addEventListener('load',function(){
                         enJuego=false;
                         reemplazoHecho=true;
                         efecto3=false;
+                        colorearElemento(carta5,0);
                         carta.innerHTML = `<img src="/images/cartas/${Jugadores[0].mano[idx].imagen}" alt="">`;
                         setTimeout(()=>{
                             carta.innerHTML=`<img src="/images/cartas/dorso.png" alt="">`;
@@ -264,7 +265,7 @@ window.addEventListener('load',function(){
                             reemplazoHecho=true;
                             agarradoDePila=false;
                             socket.emit("reemplazo",idx);
-                        }else if(Pila.ultima !=null){
+                        }else if(Pila.ultima !=null && !espejitoHecho){
                             if (Jugadores[0].mano[idx].numero == Pila.ultima.numero) {
                                 socket.emit("espejito",idx);
                             }else{
@@ -365,14 +366,35 @@ window.addEventListener('load',function(){
         carta5.addEventListener("click",()=>{
             if (Jugadores[0].turno && enJuego && Jugadores[0].cartaTemporal!=null && !agarradoDePila) {
                 switch (Jugadores[0].cartaTemporal.numero) {
-                    case 1:
-                        efectoUno();
+                    case 11:
+                    case 12:
+                        if (!efecto1) {
+                            efectoUno();
+                            colorearElemento(carta5,-1);
+                        }else{
+                            colorearElemento(carta5,0);
+                            efecto1=false;
+                        }
                         break;
-                    case 2:
-                        efectoDos();
+                    case 9:
+                    case 10:
+                        if (!efecto2) {
+                            efectoDos();
+                            colorearElemento(carta5,-1);
+                        }else{
+                            colorearElemento(carta5,0);
+                            efecto2=false;
+                        }
                         break;
-                    case 3:
-                        efectoTres();
+                    case 7:
+                    case 8:
+                        if (!efecto3) {
+                            efectoTres();
+                            colorearElemento(carta5,-1);
+                        }else{
+                            colorearElemento(carta5,0);
+                            efecto3=false;
+                        }        
                         break;
                 
                     default:
@@ -390,7 +412,7 @@ window.addEventListener('load',function(){
                     efecto2=false;
                     enJuego=false;
                     reemplazoHecho=true;
-
+                    colorearElemento(carta5,0);
                     let numCarta = i%cantCartas;
                     carta.innerHTML= `<img src="/images/cartas/${Jugadores[numJugador].mano[numCarta].imagen}" alt="">`;
                     //emitir socket de coloreo que muestre que carta vio.
@@ -414,6 +436,7 @@ window.addEventListener('load',function(){
                     efecto1aux.idOponente=Jugadores[numJugador].id;
                     efecto1aux.idMio=idNum;
                     colorearElemento(carta,5);
+                    colorearElemento(carta5,0);
                 }
             })
         });
@@ -526,9 +549,11 @@ window.addEventListener('load',function(){
 
     function colorearElemento(cosa,tiempo=colorTime){
         cosa.style.outline="goldenrod 3px solid";
-        setTimeout(()=>{
-            cosa.style.outline="";
-        },1000*tiempo)
+        if (tiempo != -1) {
+            setTimeout(()=>{
+                cosa.style.outline="";
+            },1000*tiempo)
+        }
     }
 
     function efectoUno(){
